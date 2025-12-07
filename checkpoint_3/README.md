@@ -1,10 +1,14 @@
-# Метаданные
+# Навигация
 
 > **Тетрадка с кодом:** rag_game.ipynb
 > 
 > **Аугментированные данные:** script_augmented.txt
 > 
 > **Валидационный датасет:** valid_dataset.xlsx* (или по [ссылке](https://docs.google.com/spreadsheets/d/18yd8-6-t5_yrtRpj_PKtTvY-N1LyHLjOp9kOguKkUSc/edit?usp=sharing))
+>
+> **Валидационный датасет с размеченными ответами выбранной модели:** rag_validation_results.csv
+>
+> **Валидационный датасет с посчитанными метриками:** metrics.csv
 
 # Отчёт по Чекпоинту 3
 
