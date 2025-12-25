@@ -1,7 +1,15 @@
 # Отчёт по Чекпоинту 4
 
 ## 1. Запуск приложения
-Запуск нашего FastAPI-приложения:
+
+Шаг 1. Установка зависимостей:
+
+```pip install -r requirements.txt```
+
+Шаг 2. Положите в .env Ваш groq-токен (можно получить бесплатно на сайте https://groq.com/).
+
+Шаг 3. Запуск fastapi-приложения:
+
 ```
 python -m uvicorn app.main:app --reload
 ```
@@ -9,9 +17,13 @@ python -m uvicorn app.main:app --reload
 После этого сервер будет доступен по адресу: http://127.0.0.1:8000.
 (мы сделали минимальный интерфейс, поэтому запрос forward можно отправлять через окно на сайте)
 
+<img width="1352" height="617" alt="image" src="https://github.com/user-attachments/assets/0fa1a850-096b-4a46-be22-969511489719" />
+
 ## 2. Примеры использования API
 
-В терминале в одной вкладке запустить приложение, а в другой отправлять curl-запросы. Например:
+В терминале в одной вкладке запустить приложение, а в другой отправлять curl-запросы.
+
+### Эндпоинт `/forward` (POST)
 
 ```
 curl -X POST "http://127.0.0.1:8000/forward" \
@@ -22,10 +34,13 @@ curl -X POST "http://127.0.0.1:8000/forward" \
   }'
 ```
 
+### Эндпоинт `/history` (GET)
+
 ```
 curl -X GET "http://127.0.0.1:8000/history"
 ```
- 
+
+### Эндпоинт `/history` (DELETE)
 ```
 curl -X DELETE "http://127.0.0.1:8000/history" \
 -H "X-Auth-Token: your_secure_token"
@@ -41,6 +56,22 @@ curl -X POST "http://127.0.0.1:8000/auth/login" \
 ```
 
 Сохраните аутпут и используйте внутри curl-запросов.
+
+### Эндпоинт `/stats` (GET)
+
+```
+curl -X GET "http://127.0.0.1:8000/stats" \
+  -H "Authorization: Bearer <Your_token>"
+```
+
+### Эндпоинт `/auth/login` (POST)
+Генерирует JWT-токен администратора по email и паролю.
+
+```
+curl -X POST "http://127.0.0.1:8000/auth/login" \
+-H "Content-Type: application/json" \
+-d '{"email": "admin@example.com", "password": "admin123"}'
+```
 
 # Распределение обязанностей
 
