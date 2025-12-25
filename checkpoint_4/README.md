@@ -6,7 +6,7 @@
 
 ```pip install -r requirements.txt```
 
-Шаг 2. Положите в .env Ваш groq-токен (можно получить бесплатно на сайте https://groq.com/).
+Шаг 2. Положите в checkpoint_4/.env Ваш groq-токен GROQ_API_KEY (можно получить бесплатно на сайте https://groq.com/).
 
 Шаг 3. Запуск fastapi-приложения:
 
