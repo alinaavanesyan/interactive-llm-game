@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BoJack RAG Chat</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>BoJack RAG Chat</h1>
+
+    <div class="characters">
+        {% for char in characters %}
+            <a href="/select_character/{{ char }}">
+                <button type="button" {% if selected_character == char %}class="selected"{% endif %}>{{ char }}</button>
+            </a>
+        {% endfor %}
+    </div>
+
+    <div class="chat-window">
+        {% for msg in chat %}
+            <div class="message user">Вы: {{ msg.user }}</div>
+            <div class="message bot">{{ msg.bot }}</div>
+        {% endfor %}
+    </div>
+
+    <form method="post" action="/chat" class="chat-form">
+        <input type="hidden" name="character" value="{{ selected_character }}">
+        <input type="text" name="message" placeholder="Введите сообщение" required {% if not selected_character %}disabled{% endif %}>
+        <button type="submit" {% if not selected_character %}disabled{% endif %}>Отправить</button>
+    </form>
+</body>
+</html>
