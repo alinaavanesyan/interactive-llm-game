@@ -27,7 +27,7 @@ def forward(data: dict, db: Session = Depends(get_db)):
 
     latency_ms = int((time.time() - start) * 1000)
 
-    # Сохраняем запрос и ответ в базу данных
+    # # Сохраняем запрос и ответ в базу данных
     request_history = RequestHistory(
         question=data["question"],
         character=data["character"],

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История запросов — Админ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #ffcc00;
+            text-shadow: 0 2px 10px rgba(255, 204, 0, 0.3);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffcc00 0%, #ffb800 100%);
+            color: #1a1a2e;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 204, 0, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #ffcc00;
+            font-size: 1.1rem;
+        }
+
+        .error {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 4px solid #ff6b6b;
+            padding: 1rem;
+            border-radius: 8px;
+            color: #ff9999;
+            margin-bottom: 1rem;
+        }
+
+        .stats-bar {
+            background: rgba(255, 204, 0, 0.1);
+            border-left: 4px solid #ffcc00;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffcc00;
+            margin-top: 0.2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(30, 40, 60, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        th {
+            background: rgba(255, 204, 0, 0.1);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #ffcc00;
+            border-bottom: 2px solid rgba(255, 204, 0, 0.2);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        tr:hover {
+            background: rgba(255, 204, 0, 0.05);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .character-badge {
+            display: inline-block;
+            background: rgba(0, 123, 255, 0.2);
+            color: #00d4ff;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .latency {
+            font-family: 'Courier New', monospace;
+            color: #00ff88;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.7rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-buttons {
+                width: 100%;
+            }
+
+            .nav-buttons .btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 История запросов</h1>
+            <div class="nav-buttons">
+                <a href="/admin/stats" class="btn btn-secondary">Статистика</a>
+                <a href="/" class="btn btn-primary">← Вернуться</a>
+                <button class="btn btn-danger" onclick="clearHistory()">Очистить историю</button>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">Загрузка...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="content" style="display: none;">
+            <div class="stats-bar" id="statsBar"></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Персонаж</th>
+                        <th>Вопрос</th>
+                        <th>Ответ</th>
+                        <th>Задержка (мс)</th>
+                        <th>Дата</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTable"></tbody>
+            </table>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">📭</div>
+                <p>История запросов пуста</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history');
+                if (!response.ok) throw new Error('Ошибка загрузки');
+                
+                const records = await response.json();
+                displayHistory(records);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function displayHistory(records) {
+            const tbody = document.getElementById('historyTable');
+            const emptyState = document.getElementById('emptyState');
+            const statsBar = document.getElementById('statsBar');
+
+            if (records.length === 0) {
+                emptyState.style.display = 'block';
+                statsBar.innerHTML = '';
+                tbody.innerHTML = '';
+            } else {
+                emptyState.style.display = 'none';
+                
+                // Статистика
+                const totalRequests = records.length;
+                const avgLatency = (records.reduce((sum, r) => sum + r.latency_ms, 0) / records.length).toFixed(2);
+                
+                statsBar.innerHTML = `
+                    <div class="stat-item">
+                        <span class="stat-label">Всего запросов</span>
+                        <span class="stat-value">${totalRequests}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Средняя задержка</span>
+                        <span class="stat-value">${avgLatency} мс</span>
+                    </div>
+                `;
+
+                // Таблица
+                tbody.innerHTML = records.map(r => `
+                    <tr>
+                        <td><span class="character-badge">${r.character}</span></td>
+                        <td>${escapeHtml(r.question.substring(0, 50))}...</td>
+                        <td>${escapeHtml(r.answer.substring(0, 50))}...</td>
+                        <td><span class="latency">${r.latency_ms}</span></td>
+                        <td>${new Date(r.created_at).toLocaleString('ru-RU')}</td>
+                    </tr>
+                `).join('');
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        }
+
+        async function clearHistory() {
+            if (!confirm('Вы уверены? Это действие необратимо!')) return;
+
+            try {
+                // ✅ Очищаем БД
+                const dbResponse = await fetch('/api/history', { method: 'DELETE' });
+                if (!dbResponse.ok) throw new Error('Ошибка удаления БД');
+                
+                // ✅ Очищаем чаты в памяти
+                const memResponse = await fetch('/api/clear-chat-memory', { method: 'DELETE' });
+                if (!memResponse.ok) throw new Error('Ошибка очистки памяти');
+                
+                alert('История и чаты полностью очищены!');
+                loadHistory();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').textContent = '❌ ' + message;
+            document.getElementById('error').style.display = 'block';
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        loadHistory();
+    </script>
+</body>
+</html>

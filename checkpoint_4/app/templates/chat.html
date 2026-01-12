@@ -1,31 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BoJack RAG Chat</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .admin-buttons {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.8rem 1.2rem;
+            background: linear-gradient(135deg, rgba(255, 204, 0, 0.1) 0%, rgba(255, 188, 0, 0.05) 100%);
+            border-bottom: 1px solid rgba(255, 204, 0, 0.2);
+            justify-content: flex-end;
+        }
+
+        .admin-btn {
+            padding: 0.6rem 1rem;
+            border: 1px solid rgba(255, 204, 0, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 204, 0, 0.15);
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .admin-btn:hover {
+            background: rgba(255, 204, 0, 0.25);
+            border-color: rgba(255, 204, 0, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .logout-btn {
+            background: rgba(255, 107, 107, 0.15);
+            border-color: rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 107, 107, 0.25);
+            border-color: rgba(255, 107, 107, 0.5);
+        }
+
+        .admin-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffcc00 0%, #ffb800 100%);
+            color: #1a1a1a;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+    </style>
 </head>
-<body>
-    <h1>BoJack RAG Chat</h1>
+<body {% if selected_character %} style="background-image: url('/static/{{ backgrounds[selected_character] }}');" {% endif %}>
+    <div class="chat-layout">
+        <!-- Левая часть: фон + герой -->
+        <div class="left-panel">
+            {% if selected_character %}
+                <div class="background-image"></div>
+                <div class="character-image">
+                    <img src="/static/profiles/{{ selected_character }}_profile.png"
+                         alt="{{ selected_character }} image">
+                </div>
+            {% else %}
+                <div class="no-character-hint">
+                    Выберите персонажа справа, чтобы начать диалог
+                </div>
+            {% endif %}
+        </div>
 
-    <div class="characters">
-        {% for char in characters %}
-            <a href="/select_character/{{ char }}">
-                <button type="button" {% if selected_character == char %}class="selected"{% endif %}>{{ char }}</button>
-            </a>
-        {% endfor %}
+        <!-- Правая часть: чат -->
+        <div class="right-panel">
+            <!-- ✅ АДМИН ПАНЕЛЬ (видна только админам) -->
+            {% if user_role == 'admin' %}
+            <div class="admin-buttons">
+                <a href="/admin/history" class="admin-btn">📋 История</a>
+                <a href="/admin/stats" class="admin-btn">📊 Статистика</a>
+                <a href="/logout" class="admin-btn logout-btn">🚪 Выход</a>
+            </div>
+            {% endif %}
+
+            <div class="characters">
+                {% for char in characters %}
+                    <a href="/select_character/{{ char }}">
+                        <button type="button"
+                                {% if selected_character == char %}class="selected"{% endif %}>
+                            {{ char }}
+                        </button>
+                    </a>
+                {% endfor %}
+            </div>
+
+            <div class="chat-window">
+                {% for msg in chat %}
+                    <div class="message user">Вы: {{ msg.user }}</div>
+                    <div class="message bot">{{ msg.bot }}</div>
+                {% endfor %}
+            </div>
+
+            <form method="post" action="/chat" class="chat-form">
+                <input type="hidden" name="character" value="{{ selected_character }}">
+                <input type="text" name="message"
+                       placeholder="Введите сообщение"
+                       required
+                       {% if not selected_character %}disabled{% endif %}>
+                <button type="submit" {% if not selected_character %}disabled{% endif %}>
+                    Отправить
+                </button>
+            </form>
+        </div>
     </div>
-
-    <div class="chat-window">
-        {% for msg in chat %}
-            <div class="message user">Вы: {{ msg.user }}</div>
-            <div class="message bot">{{ msg.bot }}</div>
-        {% endfor %}
-    </div>
-
-    <form method="post" action="/chat" class="chat-form">
-        <input type="hidden" name="character" value="{{ selected_character }}">
-        <input type="text" name="message" placeholder="Введите сообщение" required {% if not selected_character %}disabled{% endif %}>
-        <button type="submit" {% if not selected_character %}disabled{% endif %}>Отправить</button>
-    </form>
 </body>
 </html>

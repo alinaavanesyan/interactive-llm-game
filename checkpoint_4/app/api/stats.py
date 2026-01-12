@@ -2,14 +2,13 @@ from app.api.auth import get_current_admin
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 import numpy as np
-
 from app.db.models import RequestHistory
 from app.db.session import get_db
 
-router = APIRouter()
+router = APIRouter(prefix="/api/stats", tags=["stats"])
 
-@router.get("/stats")
-def stats(
+@router.get("")
+def get_stats(
     db: Session = Depends(get_db),
     current_admin=Depends(get_current_admin)
 ):
@@ -24,6 +23,7 @@ def stats(
     question_tokens = np.array([len(q.split()) for q in questions])
 
     return {
+        "total_requests": len(records),
         "latency_ms": {
             "mean": float(latencies.mean()),
             "p50": float(np.percentile(latencies, 50)),
