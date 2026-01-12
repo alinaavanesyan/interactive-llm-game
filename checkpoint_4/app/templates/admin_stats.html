@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика — Админ</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #ffcc00;
+            text-shadow: 0 2px 10px rgba(255, 204, 0, 0.3);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffcc00 0%, #ffb800 100%);
+            color: #1a1a2e;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 204, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #ffcc00;
+            font-size: 1.1rem;
+        }
+
+        .error {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 4px solid #ff6b6b;
+            padding: 1rem;
+            border-radius: 8px;
+            color: #ff9999;
+            margin-bottom: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(30, 40, 60, 0.6);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid #ffcc00;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffcc00;
+        }
+
+        .stat-card .unit {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-left: 0.5rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-card {
+            background: rgba(30, 40, 60, 0.6);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 204, 0, 0.1);
+        }
+
+        .chart-card h3 {
+            color: #ffcc00;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-buttons {
+                width: 100%;
+            }
+
+            .nav-buttons .btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Статистика</h1>
+            <div class="nav-buttons">
+                <a href="/admin/history" class="btn btn-secondary">История</a>
+                <a href="/" class="btn btn-primary">← Вернуться</a>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">Загрузка...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="content" style="display: none;">
+            <div class="stats-grid" id="statsGrid"></div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Задержка запросов (мс)</h3>
+                    <div class="chart-container">
+                        <canvas id="latencyChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Статистика входных данных</h3>
+                    <div class="chart-container">
+                        <canvas id="inputChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let latencyChart, inputChart;
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                if (!response.ok) throw new Error('Ошибка загрузки');
+                
+                const stats = await response.json();
+                displayStats(stats);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function displayStats(stats) {
+            if (stats.message === "no data") {
+                showError("Нет данных для отображения статистики");
+                return;
+            }
+
+            // Карточки со статистикой
+            const statsGrid = document.getElementById('statsGrid');
+            const latency = stats.latency_ms;
+            const input = stats.input_stats;
+
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <h3>Всего запросов</h3>
+                    <div class="value">${stats.total_requests}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Средняя задержка</h3>
+                    <div class="value">${latency.mean.toFixed(2)}<span class="unit">мс</span></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Медиана (P50)</h3>
+                    <div class="value">${latency.p50.toFixed(2)}<span class="unit">мс</span></div>
+                </div>
+                <div class="stat-card">
+                    <h3>P95 Задержка</h3>
+                    <div class="value">${latency.p95.toFixed(2)}<span class="unit">мс</span></div>
+                </div>
+                <div class="stat-card">
+                    <h3>P99 Задержка</h3>
+                    <div class="value">${latency.p99.toFixed(2)}<span class="unit">мс</span></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Макс. задержка</h3>
+                    <div class="value">${latency.max.toFixed(2)}<span class="unit">мс</span></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Ср. длина вопроса</h3>
+                    <div class="value">${input.avg_question_length.toFixed(0)}<span class="unit">символов</span></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Ср. токены вопроса</h3>
+                    <div class="value">${input.avg_question_tokens.toFixed(0)}<span class="unit">токенов</span></div>
+                </div>
+            `;
+
+            // График задержек
+            const latencyCtx = document.getElementById('latencyChart').getContext('2d');
+            if (latencyChart) latencyChart.destroy();
+            latencyChart = new Chart(latencyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mean', 'P50', 'P95', 'P99', 'Min', 'Max'],
+                    datasets: [{
+                        label: 'Задержка (мс)',
+                        data: [latency.mean, latency.p50, latency.p95, latency.p99, latency.min, latency.max],
+                        backgroundColor: 'rgba(255, 204, 0, 0.7)',
+                        borderColor: '#ffcc00',
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: 'rgba(255,255,255,0.7)' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        x: {
+                            ticks: { color: 'rgba(255,255,255,0.7)' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        }
+                    }
+                }
+            });
+
+            // График входных данных
+            const inputCtx = document.getElementById('inputChart').getContext('2d');
+            if (inputChart) inputChart.destroy();
+            inputChart = new Chart(inputCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Ср. длина', 'Ср. токены', 'Мин. длина', 'Макс. длина', 'Мин. токены', 'Макс. токены'],
+                    datasets: [{
+                        label: 'Входные данные',
+                        data: [
+                            input.avg_question_length,
+                            input.avg_question_tokens,
+                            input.min_length,
+                            input.max_length,
+                            input.min_tokens,
+                            input.max_tokens
+                        ],
+                        borderColor: '#ffcc00',
+                        backgroundColor: 'rgba(255, 204, 0, 0.2)',
+                        pointBackgroundColor: '#ffcc00',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    },
+                    scales: {
+                        r: {
+                            ticks: { color: 'rgba(255,255,255,0.7)' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').textContent = '❌ ' + message;
+            document.getElementById('error').style.display = 'block';
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>
