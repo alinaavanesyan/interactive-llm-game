@@ -1,0 +1,142 @@
+{
+  "locations": {
+    "living_room": {
+      "name": "Гостиная Боджека",
+      "description": "Уютная гостиная квартиры Боджека в Голливуде. На столе пустая бутылка виски, на диване разбросаны подушки. На стене висит плакат старого телешоу 'Horsin Around'. Здесь витает запах печали и одиночества.",
+      "npcs": ["bojack", "todd"],
+      "items": ["book", "remote", "whiskey_bottle"],
+      "connections": ["office", "kitchen"],
+      "background": "locations/living_room.jpg"
+    },
+    "office": {
+      "name": "Офис Кэролин",
+      "description": "Современный офис продюсера в центре Голливуда. Панорамное окно с видом на весь город. На столе стопки контрактов и кучу проектов. Кэролин сидит за столом, работая как всегда.",
+      "npcs": ["caroline"],
+      "items": ["contract", "business_card"],
+      "connections": ["living_room", "lobby"],
+      "background": "locations/office.jpg"
+    },
+    "kitchen": {
+      "name": "Кухня",
+      "description": "Скромная кухня с холодильником, полным (или пустым?) еды. На полу грязь, на столе грязная посуда. Тодд обычно здесь готовит что-то странное.",
+      "npcs": ["todd"],
+      "items": ["apple", "cereal", "milk"],
+      "connections": ["living_room"],
+      "background": "locations/kitchen.jpg"
+    },
+    "lobby": {
+      "name": "Холл офисного здания",
+      "description": "Большой холл офисного здания с мраморным полом и фонтаном. Сюда приходят успешные люди Голливуда для встреч и переговоров.",
+      "npcs": ["diane"],
+      "items": [],
+      "connections": ["office"],
+      "background": "locations/lobby.jpg"
+    }
+  },
+  "npcs": {
+    "bojack": {
+      "name": "BOJACK",
+      "full_name": "BoJack Horseman",
+      "title": "Former TV Star",
+      "bio": "A washed-up actor from a 90s sitcom, struggling with depression, addiction, and self-destruction."
+    },
+    "caroline": {
+      "name": "CAROLINE",
+      "full_name": "Princess Carolyn",
+      "title": "Entertainment Agent/Producer",
+      "bio": "A shrewd, ambitious agent and producer who manages careers and dreams."
+    },
+    "todd": {
+      "name": "TODD",
+      "full_name": "Todd Chavez",
+      "title": "Freeloading Friend",
+      "bio": "An optimistic but bumbling guy who always falls into bizarre situations."
+    },
+    "diane": {
+      "name": "DIANE",
+      "full_name": "Diane Nguyen",
+      "title": "Writer/Activist",
+      "bio": "An intelligent, principled woman trying to find meaning and make a difference."
+    },
+    "dog": {
+      "name": "DOG",
+      "full_name": "Mr. Peanutbutter",
+      "title": "Cheerful Friend",
+      "bio": "A golden retriever in a man's body - optimistic, loyal, and endlessly enthusiastic."
+    }
+  },
+  "items": {
+    "book": {
+      "name": "книга",
+      "description": "Старая потёртая книга. На обложке трудно разобрать название. Может, это поможет отвлечься от проблем?"
+    },
+    "remote": {
+      "name": "пульт",
+      "description": "Пульт от телевизора. Можно включить какой-нибудь сериал и забыть о реальности."
+    },
+    "whiskey_bottle": {
+      "name": "бутылка виски",
+      "description": "Пустая бутылка. Или может, там ещё есть капля?"
+    },
+    "apple": {
+      "name": "яблоко",
+      "description": "Красивое красное яблоко. Свежее и хрустящее."
+    },
+    "cereal": {
+      "name": "хлопья",
+      "description": "Коробка хлопьев. Основной продукт питания Тодда."
+    },
+    "milk": {
+      "name": "молоко",
+      "description": "Молоко. Обязательно проверить дату выпуска."
+    },
+    "contract": {
+      "name": "контракт",
+      "description": "Важный контракт на съёмки нового проекта. Может это твой шанс?"
+    },
+    "business_card": {
+      "name": "визитная карточка",
+      "description": "Визитная карточка Кэролин. На ней её номер телефона и логотип агентства."
+    }
+  },
+  "quests": [
+    {
+      "id": "find_bojack",
+      "title": "Find BoJack",
+      "description": "Locate BoJack in his apartment and have a conversation with him",
+      "reward": 10,
+      "difficulty": "easy",
+      "status": "available"
+    },
+    {
+      "id": "meet_all_characters",
+      "title": "Meet Everyone",
+      "description": "Have a conversation with each main character",
+      "reward": 50,
+      "difficulty": "medium",
+      "status": "available"
+    },
+    {
+      "id": "collect_memories",
+      "title": "Collect Memories",
+      "description": "Collect all items in the game",
+      "reward": 30,
+      "difficulty": "hard",
+      "status": "available"
+    },
+    {
+      "id": "understand_bojack",
+      "title": "Understand BoJack",
+      "description": "Build strong trust with BoJack (trust > 80) and hear his story",
+      "reward": 100,
+      "difficulty": "very_hard",
+      "status": "available"
+    }
+  ],
+  "meta": {
+    "title": "BoJack Interactive Experience",
+    "description": "A text-based adventure where you explore the lives of BoJack and his friends",
+    "version": "1.0",
+    "created_with": "RAG + LLM (Llama 3.3-70B + Hybrid Retrieval + Cross-Encoder Reranking)"
+  }
+}

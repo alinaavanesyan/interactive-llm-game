@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoJack — Детектив</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* ── ЭКРАНЫ ── */
+        .screen { display: none; position: relative; z-index: 2; }
+        .screen.active { display: flex; }
+
+        /* ══════════════════════════════
+           ЭКРАН 1 — ВЫБОР ДЕЛА
+        ══════════════════════════════ */
+        #screenCases {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            background: radial-gradient(ellipse at 50% 30%, #1a2233 0%, #0d1420 50%, #060c14 100%);
+        }
+        .cases-title {
+            font-size: 30px; font-weight: bold; color: #ffcc00;
+            text-shadow: 2px 2px 8px rgba(0,0,0,.8);
+            margin-bottom: 6px; letter-spacing: 2px;
+        }
+        .cases-sub { color: rgba(255,255,255,.5); font-size: 13px; margin-bottom: 36px; }
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px; max-width: 860px; width: 100%;
+        }
+        .case-card {
+            background: rgba(0,0,0,.75);
+            border: 1px solid rgba(255,204,0,.25);
+            border-radius: 12px; padding: 22px;
+            cursor: pointer; transition: all .2s;
+            backdrop-filter: blur(6px);
+        }
+        .case-card:hover {
+            border-color: #ffcc00;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(255,204,0,.2);
+        }
+        .cn { font-size: 11px; color: #ffcc00; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+        .ct { font-size: 17px; font-weight: bold; color: #fff; margin-bottom: 8px; }
+        .cp { font-size: 13px; color: rgba(255,255,255,.55); line-height: 1.5; }
+        .cd { display: inline-block; margin-top: 10px; padding: 3px 10px; border-radius: 20px;
+              font-size: 11px; background: rgba(255,204,0,.12); color: #ffcc00;
+              border: 1px solid rgba(255,204,0,.25); }
+
+        /* ══════════════════════════════
+           ЭКРАН 2 — ОПИСАНИЕ ДЕЛА
+        ══════════════════════════════ */
+        #screenCaseDesc {
+            flex-direction: column; align-items: center;
+            justify-content: center; min-height: 100vh; padding: 40px 20px;
+            background: radial-gradient(ellipse at 50% 30%, #1a2233 0%, #0d1420 50%, #060c14 100%);
+        }
+        .desc-box {
+            max-width: 620px; width: 100%;
+            background: rgba(0,0,0,.82); border: 1px solid rgba(255,204,0,.35);
+            border-radius: 16px; padding: 38px; backdrop-filter: blur(8px); text-align: center;
+        }
+        .desc-num { font-size: 11px; color: #ffcc00; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+        .desc-title { font-size: 24px; font-weight: bold; color: #fff; margin-bottom: 20px; }
+        .desc-text { font-size: 14px; color: rgba(255,255,255,.78); line-height: 1.8; margin-bottom: 28px; }
+        .desc-hint { font-size: 12px; color: rgba(255,255,255,.35); margin-bottom: 22px; }
+        .btn-primary {
+            padding: 13px 44px; background: #ffcc00; color: #1a1a1a;
+            border: none; border-radius: 8px; font-size: 15px; font-weight: bold;
+            cursor: pointer; transition: all .2s; margin-right: 10px;
+        }
+        .btn-primary:hover { background: #ffe033; transform: translateY(-2px); }
+        .btn-ghost {
+            padding: 13px 22px; background: transparent; color: rgba(255,255,255,.45);
+            border: 1px solid rgba(255,255,255,.18); border-radius: 8px;
+            font-size: 13px; cursor: pointer; transition: all .2s;
+        }
+        .btn-ghost:hover { color: #fff; border-color: #fff; }
+
+        /* ══════════════════════════════
+           ЭКРАН 3 — ИГРА
+        ══════════════════════════════ */
+        #screenGame { flex-direction: column; height: 100vh; width: 100vw; }
+
+        /* TOP BAR */
+        .top-bar {
+            flex-shrink: 0; height: 50px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px;
+            background: rgba(0,0,0,.85); border-bottom: 1px solid rgba(255,255,255,.08);
+            z-index: 10;
+        }
+        .top-case-title { font-size: 13px; color: #ffcc00; font-weight: bold; }
+        .top-actions { display: flex; gap: 10px; }
+        .top-btn {
+            padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;
+            cursor: pointer; transition: all .2s; border: none;
+        }
+        .btn-hint { background: rgba(255,204,0,.15); color: #ffcc00; border: 1px solid rgba(255,204,0,.3); }
+        .btn-hint:hover { background: rgba(255,204,0,.3); }
+        .btn-answer { background: #ffcc00; color: #1a1a1a; }
+        .btn-answer:hover { background: #ffe033; }
+        .btn-back { background: transparent; color: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.15); }
+        .btn-back:hover { color: #fff; border-color: rgba(255,255,255,.4); }
+        .btn-restart { background: rgba(255,80,80,.12); color: #ff8080; border: 1px solid rgba(255,80,80,.25); }
+        .btn-restart:hover { background: rgba(255,80,80,.25); }
+        .top-left { display: flex; align-items: center; gap: 12px; }
+
+        /* MAIN CONTENT */
+        .game-content {
+            flex: 1; display: flex; overflow: hidden;
+        }
+
+        /* LEFT — фон + аватар */
+        .game-left {
+            width: 62%; height: 100%; position: relative; overflow: hidden;
+        }
+        .loc-bg {
+            position: absolute; inset: 0;
+            background-size: cover; background-position: center;
+            transition: background-image .4s ease;
+        }
+        .char-avatar {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            height: 92%; max-width: 85%; object-fit: contain;
+            transition: opacity .35s; filter: drop-shadow(0 0 24px rgba(0,0,0,.7));
+        }
+        .loc-name-badge {
+            position: absolute; top: 14px; left: 14px;
+            background: rgba(0,0,0,.65); color: #ffcc00;
+            padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: bold;
+            border: 1px solid rgba(255,204,0,.3); backdrop-filter: blur(4px);
+        }
+
+        /* RIGHT — чат */
+        .game-right {
+            width: 38%; height: 100%;
+            background: rgba(8,8,18,.92); display: flex; flex-direction: column;
+            padding: 16px; border-left: 1px solid rgba(255,255,255,.07);
+        }
+        .npc-header {
+            flex-shrink: 0; display: flex; align-items: center; gap: 10px;
+            padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 12px;
+        }
+        .npc-avatar-small {
+            width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+            border: 2px solid #ffcc00;
+        }
+        .npc-name { font-size: 14px; font-weight: bold; color: #ffcc00; }
+        .npc-role { font-size: 11px; color: rgba(255,255,255,.4); }
+
+        .chat-log {
+            flex: 1; overflow-y: auto; margin-bottom: 12px; padding-right: 2px;
+        }
+        .chat-log::-webkit-scrollbar { width: 3px; }
+        .chat-log::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 2px; }
+
+        .msg { margin-bottom: 12px; animation: fadeUp .25s ease; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .msg-system { color: rgba(255,255,255,.35); font-size: 12px; font-style: italic; text-align: center; padding: 4px; }
+        .msg-player { text-align: right; }
+        .msg-player .bub { display: inline-block; background: rgba(255,204,0,.15); color: #ffcc00;
+            border: 1px solid rgba(255,204,0,.3); padding: 8px 13px;
+            border-radius: 14px 14px 2px 14px; font-size: 13px; max-width: 85%; }
+        .msg-npc .bub-name { font-size: 10px; color: rgba(255,255,255,.4); margin-bottom: 3px; text-transform: uppercase; }
+        .msg-npc .bub { display: inline-block; background: rgba(255,255,255,.06);
+            color: rgba(255,255,255,.88); border: 1px solid rgba(255,255,255,.1);
+            padding: 9px 13px; border-radius: 2px 14px 14px 14px;
+            font-size: 13px; line-height: 1.6; max-width: 95%; }
+
+        .chat-input-row {
+            display: flex; gap: 8px; flex-shrink: 0;
+        }
+        .chat-input-row input {
+            flex: 1; padding: 10px 13px; background: rgba(255,255,255,.06);
+            color: #fff; border: 1px solid rgba(255,255,255,.14); border-radius: 8px; font-size: 13px;
+        }
+        .chat-input-row input:focus { outline: none; border-color: #ffcc00; }
+        .chat-input-row input:disabled { opacity: .5; }
+        .chat-input-row button {
+            padding: 10px 16px; background: #ffcc00; color: #1a1a1a;
+            border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
+        }
+        .chat-input-row button:hover { background: #ffe033; }
+        .chat-input-row button:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+        /* BOTTOM — локации */
+        .loc-tabs {
+            flex-shrink: 0; display: flex; gap: 0;
+            background: rgba(0,0,0,.9); border-top: 1px solid rgba(255,255,255,.08);
+        }
+        .loc-tab {
+            flex: 1; padding: 12px 4px; display: flex; flex-direction: column;
+            align-items: center; gap: 4px; cursor: pointer;
+            border: none; background: transparent; color: rgba(255,255,255,.45);
+            font-size: 11px; transition: all .2s; border-right: 1px solid rgba(255,255,255,.06);
+            border-top: 2px solid transparent;
+        }
+        .loc-tab:last-child { border-right: none; }
+        .loc-tab:hover { background: rgba(255,204,0,.08); color: rgba(255,255,255,.75); }
+        .loc-tab.active { color: #ffcc00; border-top-color: #ffcc00; background: rgba(255,204,0,.07); }
+        .loc-tab .tab-icon { font-size: 18px; }
+        .loc-tab .tab-name { font-size: 10px; }
+
+        /* ── МОДАЛКИ ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.75); z-index: 100;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: #0f0f1a; border: 1px solid rgba(255,204,0,.3);
+            border-radius: 16px; padding: 36px; max-width: 480px; width: 90%;
+            text-align: center; backdrop-filter: blur(10px);
+        }
+        .modal h2 { color: #ffcc00; margin-bottom: 16px; font-size: 20px; }
+        .modal p { color: rgba(255,255,255,.75); font-size: 14px; line-height: 1.7; margin-bottom: 24px; }
+        .modal input {
+            width: 100%; padding: 11px 14px; background: rgba(255,255,255,.06);
+            color: #fff; border: 1px solid rgba(255,255,255,.2); border-radius: 8px;
+            font-size: 14px; margin-bottom: 16px; box-sizing: border-box;
+        }
+        .modal input:focus { outline: none; border-color: #ffcc00; }
+        .modal-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .modal-btns button { padding: 10px 22px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .btn-check { background: #ffcc00; color: #1a1a1a; border: none; }
+        .btn-check:hover { background: #ffe033; }
+        .btn-give-up { background: transparent; color: rgba(255,255,255,.4); border: 1px solid rgba(255,255,255,.2); }
+        .btn-give-up:hover { color: #ff6b6b; border-color: #ff6b6b; }
+        .btn-close { background: rgba(255,255,255,.08); color: rgba(255,255,255,.6); border: 1px solid rgba(255,255,255,.15); }
+        .btn-close:hover { background: rgba(255,255,255,.15); }
+
+        .modal-wrong { color: #ff6b6b; font-size: 13px; margin-bottom: 12px; display: none; }
+        .modal-reveal { display: none; }
+        .modal-reveal p { color: rgba(255,255,255,.85); text-align: left; line-height: 1.8; }
+        .modal-success-icon { font-size: 48px; margin-bottom: 12px; }
+
+        @media (max-width: 700px) {
+            .game-left { display: none; }
+            .game-right { width: 100%; }
+        }
+    </style>
+</head>
+<body id="gameBody">
+
+<!-- ЭКРАН 1: Выбор дела -->
+<div id="screenCases" class="screen active">
+    <div style="position:absolute;top:16px;right:16px;display:flex;gap:10px;">
+        <a href="/profile" style="padding:8px 16px;background:rgba(255,204,0,.12);color:#ffcc00;border:1px solid rgba(255,204,0,.3);border-radius:20px;font-size:12px;font-weight:bold;text-decoration:none;">👤 Профиль</a>
+        <a href="/logout" style="padding:8px 16px;background:rgba(255,80,80,.1);color:#ff8080;border:1px solid rgba(255,80,80,.25);border-radius:20px;font-size:12px;font-weight:bold;text-decoration:none;">Выйти</a>
+    </div>
+    <div class="cases-title">ДЕЛА БОДЖЕКА</div>
+    <div class="cases-sub">Выберите дело для расследования</div>
+    <div class="cases-grid" id="casesGrid"></div>
+</div>
+
+<!-- ЭКРАН 2: Описание дела -->
+<div id="screenCaseDesc" class="screen">
+    <div class="desc-box">
+        <div class="desc-num" id="descNum"></div>
+        <div class="desc-title" id="descTitle"></div>
+        <div class="desc-text" id="descText"></div>
+        <div class="desc-hint">Разговаривай с персонажами, собирай улики и назови виновника</div>
+        <div>
+            <button class="btn-primary" onclick="startGame()">Начать расследование</button>
+            <button class="btn-ghost" onclick="showScreen('screenCases')">← Назад</button>
+        </div>
+    </div>
+</div>
+
+<!-- ЭКРАН 3: Игра -->
+<div id="screenGame" class="screen">
+
+    <!-- Верхняя панель -->
+    <div class="top-bar">
+        <div class="top-left">
+            <button class="top-btn btn-back" onclick="backToMenu()">← Меню</button>
+            <div class="top-case-title" id="topCaseTitle">Дело №1</div>
+        </div>
+        <div class="top-actions">
+            <button class="top-btn btn-restart" onclick="restartCase()">↺ Заново</button>
+            <button class="top-btn btn-hint" onclick="openCaseModal()">📁 Дело</button>
+            <button class="top-btn btn-hint" onclick="openHintModal()">💡 Подсказка</button>
+            <button class="top-btn btn-answer" onclick="openAnswerModal()">🔍 Дать ответ</button>
+            <a href="/profile" class="top-btn btn-back" style="text-decoration:none">👤 Профиль</a>
+        </div>
+    </div>
+
+    <!-- Основное содержимое -->
+    <div class="game-content">
+        <!-- Левая часть: фон + аватар -->
+        <div class="game-left">
+            <div class="loc-bg" id="locBg"></div>
+            <img class="char-avatar" id="charAvatar" src="" alt="">
+            <div class="loc-name-badge" id="locNameBadge">Гостиная</div>
+        </div>
+
+        <!-- Правая часть: чат -->
+        <div class="game-right">
+            <div class="npc-header">
+                <img class="npc-avatar-small" id="npcAvatarSmall" src="" alt="">
+                <div>
+                    <div class="npc-name" id="npcName">Боджек</div>
+                    <div class="npc-role" id="npcRole">Бывшая звезда телешоу</div>
+                </div>
+            </div>
+            <div class="chat-log" id="chatLog"></div>
+            <form class="chat-input-row" id="chatForm" onsubmit="sendMessage(event)">
+                <input type="text" id="msgInput" placeholder="Задай вопрос персонажу..." autocomplete="off">
+                <button type="submit" id="sendBtn">→</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Нижняя панель: локации -->
+    <div class="loc-tabs" id="locTabs"></div>
+</div>
+
+<!-- МОДАЛКА: Напомнить дело -->
+<div class="modal-overlay" id="caseModal">
+    <div class="modal">
+        <h2>📁 <span id="caseModalNum"></span></h2>
+        <p style="font-size:18px; font-weight:bold; color:#fff; margin-bottom:12px;" id="caseModalTitle"></p>
+        <p id="caseModalText"></p>
+        <div class="modal-btns">
+            <button class="btn-close" onclick="closeModal('caseModal')">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛКА: Подсказка -->
+<div class="modal-overlay" id="hintModal">
+    <div class="modal">
+        <h2>💡 Подсказка</h2>
+        <p id="hintText"></p>
+        <div class="modal-btns">
+            <button class="btn-close" onclick="closeModal('hintModal')">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛКА: Дать ответ -->
+<div class="modal-overlay" id="answerModal">
+    <div class="modal">
+        <div id="answerForm">
+            <h2>🔍 Назови виновника</h2>
+            <p>Кто несёт ответственность за произошедшее?</p>
+            <input type="text" id="answerInput" placeholder="Введи имя персонажа..." onkeydown="if(event.key==='Enter'){event.preventDefault();checkAnswer();}">
+            <div class="modal-wrong" id="wrongMsg">❌ Неверно. Подумай ещё или возьми подсказку.</div>
+            <div class="modal-btns">
+                <button type="button" class="btn-check" onclick="checkAnswer()">Проверить</button>
+                <button type="button" class="btn-give-up" onclick="giveUp()">Сдаться</button>
+                <button type="button" class="btn-close" onclick="closeModal('answerModal')">Отмена</button>
+            </div>
+        </div>
+        <div class="modal-reveal" id="revealBlock">
+            <div class="modal-success-icon" id="revealIcon"></div>
+            <h2 id="revealTitle"></h2>
+            <p id="revealText"></p>
+            <div class="modal-btns">
+                <button type="button" class="btn-primary" onclick="closeModal('answerModal'); backToMenu()">Выбрать другое дело</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/game.js?v=5"></script>
+</body>
+</html>
