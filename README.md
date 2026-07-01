@@ -3,12 +3,30 @@
 ## 📌 Тема проекта
 Создание интерактивной текстовой игры на русском языке с использованием **LLM**, **function calling** и веб-интерфейса на **Streamlit**.
 
+
 ## Запуск сервиса
+## 🚀 Быстрый старт
+
+1. Перейти в директорию сервиса и установить зависимости:
+ 
+ ```
+ cd checkpoint_4
+pip install -r requirements.txt
+```
+
+2. Создать файл `checkpoint_4/.env` и указать в нём Groq API-ключ (бесплатно на https://groq.com/):
 
 ```
-cd checkpoint_4
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+GROQ_API_KEY=your_groq_api_key
 ```
+
+3. Запустить сервис:
+
+```
+ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+ ```
+ 
+Приложение будет доступно по адресу http://127.0.0.1:8000. Подробности об эндпоинтах API и примерах curl-запросов — в [checkpoint_4/README.md](checkpoint_4/README.md).
 
 ---
 
