@@ -3,9 +3,9 @@
 ## 📌 Тема проекта
 Создание интерактивной текстовой игры на русском языке с использованием **LLM**, **function calling** и веб-интерфейса на **Streamlit**.
 
-
-## Запуск сервиса
 ## 🚀 Быстрый старт
+
+<img width="967" height="452" alt="image" src="https://github.com/user-attachments/assets/9fcb3ad5-3484-44f4-bd38-a72f207d73f0" />
 
 1. Перейти в директорию сервиса и установить зависимости:
  
@@ -25,8 +25,6 @@ GROQ_API_KEY=your_groq_api_key
 ```
  uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
  ```
-
-<img width="967" height="452" alt="image" src="https://github.com/user-attachments/assets/c35e3b3d-a0be-49fa-8171-9c3ab6db4337" />
 
 Приложение будет доступно по адресу http://127.0.0.1:8000. Подробности об эндпоинтах API и примерах curl-запросов — в [checkpoint_4/README.md](checkpoint_4/README.md).
 
